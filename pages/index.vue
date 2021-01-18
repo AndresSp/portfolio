@@ -1,13 +1,12 @@
 <template>
-  <main class="container mx-auto px-8 h-screen flex flex-col justify-center">
-    <!-- <div class="w-3/4"> -->
+  <main id="main" class="container mx-auto px-8 h-screen flex flex-col justify-start pt-32">
       <section class="flex justify-center font-title text-3xl md:text-6xl font-medium text-white tracking-wide ">
         <h1 id="name">I am n</h1>
       </section>
       <section class="flex justify-center font-title text-3xl md:text-6xl font-medium text-white tracking-wide mt-6">
         <h1 id="career">a c</h1>
       </section>
-      <section id="dino-container" class="flex justify-center mb-20">
+      <section id="dino-container" class="flex justify-center mt-20">
         <div id="inner-door"></div>
         <div id="door"></div>
         <div id="dino"></div>
@@ -20,7 +19,8 @@
       </section>
       <section v-if="showSkip && introSeen" id="skip" class="flex justify-end font-title text-2xl text-white cursor-pointer mt-12">
         <h1 @click="skip">SKIP</h1>
-        </section>
+      </section>
+      <!-- <section v-else class="mt-12" style="color: transparent">TEXT</section> -->
     <!-- </div> -->
   </main>
 </template>
@@ -36,7 +36,7 @@ export default {
       showSkip: true,
       isDesktop: false,
       introSeen: false,
-      start: false,
+      start: false
     }
   },
 
@@ -66,7 +66,6 @@ export default {
     },
 
     startGame() {
-      console.log('startGame')
       const gsap = this.$gsap()
 
       this.startGameIntroTl = gsap.timeline();
@@ -92,14 +91,42 @@ export default {
 
       const earthquakeTl = gsap.timeline();
 
-      CustomEase.create('earthquake', 'M0,0 C0,0 0.062,0 0.077,0 0.078,0.016 0.077,0.341 0.078,0.358 0.093,0.358 0.138,0.358 0.153,0.358 0.153,0.374 0.155,-0.37 0.156,-0.354 0.171,-0.354 0.214,-0.354 0.23,-0.354 0.23,-0.338 0.231,0.629 0.231,0.646 0.246,0.646 0.291,0.646 0.306,0.646 0.307,0.662 0.308,-0.37 0.308,-0.354 0.323,-0.354 0.368,-0.354 0.383,-0.354 0.383,-0.338 0.384,0.629 0.385,0.646 0.4,0.646 0.444,0.646 0.46,0.646 0.46,0.662 0.461,-0.37 0.461,-0.354 0.477,-0.354 0.522,-0.354 0.538,-0.354 0.538,-0.338 0.539,0.629 0.54,0.646 0.555,0.646 0.599,0.646 0.615,0.646 0.615,0.662 0.616,-0.37 0.616,-0.354 0.631,-0.354 0.676,-0.354 0.691,-0.354 0.692,-0.338 0.693,0.629 0.693,0.646 0.708,0.646 0.753,0.646 0.768,0.646 0.768,0.662 0.769,-0.37 0.77,-0.354 0.785,-0.354 0.829,-0.354 0.845,-0.354 0.845,-0.338 0.846,0.351 0.847,0.368 0.862,0.368 0.906,0.368 0.922,0.368 0.922,0.384 0.923,-0.017 0.923,0 0.938,0 1,0 1,0 ')
+      let meteors = [],
+      main = document.querySelector('#main');
 
+      for (let i = 0; i < 10; i++) {
+      const meteor = document.createElement('div');
+      meteor.setAttribute('class', 'meteor');
+      main.appendChild(meteor);
+      meteors.push(meteor);
+      }
+
+      const meteorContainderWidth = main.offsetWidth
+      console.log(meteorContainderWidth)
+      earthquakeTl.set('.meteor', {
+        left: `random(0, ${meteorContainderWidth})`,
+        top: 'random(-60, -200)'
+      })
+      earthquakeTl.to('.meteor', {
+        duration: 5,
+        physics2D: {
+          gravity: 'random(700, 1000)',
+          friction: 0.02
+        },
+        stagger: {
+          from: 'random',
+          amount: 5.5
+        }
+      })
+
+      CustomEase.create('earthquake', 'M0,0 C0,0 0.062,0 0.077,0 0.078,0.016 0.077,0.341 0.078,0.358 0.093,0.358 0.138,0.358 0.153,0.358 0.153,0.374 0.155,-0.37 0.156,-0.354 0.171,-0.354 0.214,-0.354 0.23,-0.354 0.23,-0.338 0.231,0.629 0.231,0.646 0.246,0.646 0.291,0.646 0.306,0.646 0.307,0.662 0.308,-0.37 0.308,-0.354 0.323,-0.354 0.368,-0.354 0.383,-0.354 0.383,-0.338 0.384,0.629 0.385,0.646 0.4,0.646 0.444,0.646 0.46,0.646 0.46,0.662 0.461,-0.37 0.461,-0.354 0.477,-0.354 0.522,-0.354 0.538,-0.354 0.538,-0.338 0.539,0.629 0.54,0.646 0.555,0.646 0.599,0.646 0.615,0.646 0.615,0.662 0.616,-0.37 0.616,-0.354 0.631,-0.354 0.676,-0.354 0.691,-0.354 0.692,-0.338 0.693,0.629 0.693,0.646 0.708,0.646 0.753,0.646 0.768,0.646 0.768,0.662 0.769,-0.37 0.77,-0.354 0.785,-0.354 0.829,-0.354 0.845,-0.354 0.845,-0.338 0.846,0.351 0.847,0.368 0.862,0.368 0.906,0.368 0.922,0.368 0.922,0.384 0.923,-0.017 0.923,0 0.938,0 1,0 1,0 ')
+      
       earthquakeTl.to('#dino', { 
         duration: 1, 
         x: 30,
         ease: 'earthquake',
         repeat: 5
-      })
+      }, '<3')
 
       earthquakeTl.dinoHurt('#dino', { duration: 1, repeat: 5 }, '<')
 
@@ -142,6 +169,13 @@ export default {
           amount: 1
         }  
       }, '<')
+      
+      earthquakeTl.to('#dino', {
+        duration: 3,
+        physics2D: {
+          gravity: 400
+        }
+      }, '<2')
 
       return earthquakeTl
     },
@@ -499,9 +533,34 @@ export default {
   image-rendering: pixelated;
 }
 
+.meteor {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f1e3ce;
+  position: absolute;
+  box-shadow: 
+    0 5px 10px 3px #FAE2BF,
+    0 5px 10px 3px #EE9F2A inset,
+    0 -10px 10px 3px #FAE2BF inset,
+    0 -10px 20px 3px black inset,
+    0 -5px 10px 3px #FAE2BF,
+    0 -5px 10px 3px #EE9F2A,
+    0 -20px 10px 3px #EE9F2A,
+    0 -15px 10px 1px #EE9F2A,
+    0 -30px 10px 0px #EE9F2A,
+    0 -45px 15px 0px #EE9F2A;
+  /* top: -40px;
+  right: -40px; */
+}
+
 body {
   background-color: #1A1D0E;
-  overflow: hidden;
  
+}
+
+main {
+  position: relative;
+  overflow: hidden;
 }
 </style>
