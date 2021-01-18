@@ -102,7 +102,7 @@ export default {
       }
 
       const meteorContainderWidth = main.offsetWidth
-      console.log(meteorContainderWidth)
+
       earthquakeTl.set('.meteor', {
         left: `random(0, ${meteorContainderWidth})`,
         top: 'random(-60, -200)'
@@ -174,10 +174,15 @@ export default {
         duration: 3,
         physics2D: {
           gravity: 400
-        }
+        },
+        onComplete: this.onCompleteMeteorsTransition
       }, '<2')
 
       return earthquakeTl
+    },
+
+    onCompleteMeteorsTransition() {
+      this.$router.push('game')
     },
     //#endregion start game intro
 
@@ -486,11 +491,6 @@ export default {
 </script>
 
 <style>
-/* Sample `apply` at-rules with Tailwind CSS
-.container {
-@apply min-h-screen flex justify-center items-center text-center mx-auto;
-}
-*/
 #name  > div {
   opacity: 0;
 }
@@ -552,11 +552,6 @@ export default {
     0 -45px 15px 0px #EE9F2A;
   /* top: -40px;
   right: -40px; */
-}
-
-body {
-  background-color: #1A1D0E;
- 
 }
 
 main {
