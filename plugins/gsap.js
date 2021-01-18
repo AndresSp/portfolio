@@ -6,6 +6,8 @@ import { CustomEase } from 'gsap/CustomEase';
 import { CustomWiggle } from 'gsap/CustomWiggle';
 import { PhysicsPropsPlugin } from 'gsap/PhysicsPropsPlugin';
 import { Physics2DPlugin } from 'gsap/Physics2DPlugin';
+import { PixiPlugin } from 'gsap/PixiPlugin';
+import * as PIXI from 'pixi.js';
 
 export default ({ app }, inject) => {
     // Inject $hello(msg) in Vue, context and store.
@@ -15,8 +17,11 @@ export default ({ app }, inject) => {
       CustomEase, 
       CustomWiggle,
       Physics2DPlugin, 
+      PixiPlugin,
       GSDevTools
       );
+      
+    PixiPlugin.registerPIXI(PIXI);
 
     inject('gsap', () => gsap)
     inject('SplitText', () => SplitText)
@@ -24,6 +29,8 @@ export default ({ app }, inject) => {
     inject('CustomEase', () => CustomEase)
     inject('CustomWiggle', () => CustomWiggle)
     inject('Physics2DPlugin', () => Physics2DPlugin)
+    inject('PixiPlugin', () => PixiPlugin)
+    inject('PIXI', () => PIXI)
     inject('GSDevTools', () => GSDevTools)
 
   }
