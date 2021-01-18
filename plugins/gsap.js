@@ -7,7 +7,7 @@ import { CustomWiggle } from 'gsap/CustomWiggle';
 import { PhysicsPropsPlugin } from 'gsap/PhysicsPropsPlugin';
 import { Physics2DPlugin } from 'gsap/Physics2DPlugin';
 import { PixiPlugin } from 'gsap/PixiPlugin';
-import * as PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js-legacy';
 
 export default ({ app }, inject) => {
     // Inject $hello(msg) in Vue, context and store.

@@ -16,7 +16,6 @@ export default {
 
         // app.renderer.resize(window.innerWidth, window.innerHeight);
         window.onresize = this.onResize
-        window.onOri
 
         document.querySelector('#container').appendChild(this.app.view);
 
@@ -37,26 +36,24 @@ export default {
 
         this.dino = new PIXI.AnimatedSprite(frames)
 
-        const width = this.app.screen.width
-        const height = this.app.screen.height
-
-        this.dino.x = width / 2
-        this.dino.y = height / 2
-        this.dino.height = 72
-        this.dino.width = 72
-        this.dino.anchor.set(0.5)
-        this.dino.animationSpeed = 0.1
+        this.setDinoProps()
         this.dino.play()
 
         this.app.stage.addChild(this.dino)
         },
         onResize() {
             this.app.renderer.resize(window.innerWidth, window.innerHeight);
-            this.dino.x = this.app.screen.width / 2
-            this.dino.y = this.app.screen.height / 2
-            this.dino.height = 72
-            this.dino.width = 72
+            this.setDinoProps()
+        },
+        setDinoProps() {
+            const width = this.app.screen.width
+            const height = this.app.screen.height
+            this.dino.x = width / 6
+            this.dino.y = height - height / 6
+            this.dino.height = 96
+            this.dino.width = 96
             this.dino.anchor.set(0.5)
+            this.dino.animationSpeed = 0.1
         }
     }
 }
