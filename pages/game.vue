@@ -5,55 +5,68 @@
 <script>
 
 export default {
-    mounted() {
-        const PIXI = this.$PIXI();
-
-        this.app = new PIXI.Application({
-            transparent: true,
-            width: window.innerWidth,
-            height: window.innerHeight
-        });
-
-        // app.renderer.resize(window.innerWidth, window.innerHeight);
-        window.onresize = this.onResize
-
-        document.querySelector('#container').appendChild(this.app.view);
-
-        this.app.loader
-        .add('/dino/dinospritesheet.json')
-        .load(this.onDinoLoaded);
-
+    async mounted() {
+        await this.mainGame()
     },
 
     methods: {
-        onDinoLoaded() {
-        const PIXI = this.$PIXI();
-        let frames = []
+        async mainGame() {
+            this.PIXI = this.$PIXI();
 
-        for (let i = 0; i < 24; i++) {
-            frames.push(PIXI.Texture.from(`dino-${i}.png`))
-        }
+            this.app = new this.PIXI.Application({
+                transparent: true,
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
 
-        this.dino = new PIXI.AnimatedSprite(frames)
+            document.querySelector('#container').appendChild(this.app.view);
 
-        this.setDinoProps()
-        this.dino.play()
+            const [_, level] = await Promise.all([
+                this.loadAssets({
+                    dino: '/dino/spritesheet.json'
+                }),
+                // import("./assets/levels/level1.json")
+            ]);
 
-        this.app.stage.addChild(this.dino)
+            const character = this.character()
+
+            this.app.stage.addChild(character)
+
+            window.onresize = () => {
+                this.app.renderer.resize(window.innerWidth, window.innerHeight);
+
+                const width = this.app.screen.width
+                const height = this.app.screen.height
+
+                character.x = width / 6
+                character.y = height - height / 6
+            }
         },
-        onResize() {
-            this.app.renderer.resize(window.innerWidth, window.innerHeight);
-            this.setDinoProps()
+        loadAssets (textures) {
+            return new Promise(resolve => {
+                Object.keys(textures).map((key) => {
+                    this.PIXI.Loader.shared.add(key, textures[key]);
+                })
+                    this.PIXI.Loader.shared.load(resolve);
+                });
         },
-        setDinoProps() {
+        character() {
+
             const width = this.app.screen.width
             const height = this.app.screen.height
-            this.dino.x = width / 6
-            this.dino.y = height - height / 6
-            this.dino.height = 96
-            this.dino.width = 96
-            this.dino.anchor.set(0.5)
-            this.dino.animationSpeed = 0.1
+
+            const resource = this.PIXI.Loader.shared.resources['dino'];
+            const sprite = new this.PIXI.AnimatedSprite(resource.spritesheet.animations.idle);
+
+            sprite.x = width / 6
+            sprite.y = height - height / 6
+            sprite.height = 96
+            sprite.width = 96
+            sprite.anchor.set(0.5)
+            sprite.animationSpeed = 0.1
+            sprite.play()
+
+            return sprite
         }
     }
 }
