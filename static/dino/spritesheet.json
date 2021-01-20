@@ -197,7 +197,7 @@
 	"idle": ["idle-0.png","idle-1.png","idle-2.png"],
 	"kick": ["kick-0.png","kick-1.png","kick-2.png","kick-3.png"],
 	"sneak": ["sneak-0.png","sneak-1.png","sneak-2.png","sneak-3.png","sneak-4.png","sneak-5.png","sneak-6.png"],
-	"walk": ["walk-0.png","walk-1.png","walk-2.png","walk-3.png","walk-4.png","walk-5.png","walk-6.png"]
+	"walk": ["walk-1.png","walk-2.png","walk-3.png","walk-4.png","walk-5.png"]
 },
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
