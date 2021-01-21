@@ -3,64 +3,109 @@
 </template>
 
 <script>
-
+const state = {
+    INTRO: 0,
+    PLAY: 1,
+    SHOW: 2,
+    OUTRO: 3
+}
 export default {
-    async mounted() {
-        await this.mainGame()
+    data() {
+        return {
+            PIXI: undefined,
+            app: undefined,
+            player: undefined,
+            initialGround: [],
+            ground: undefined,
+            speedX: 0,
+            speedY: 0,
+            playerBounds: undefined,
+            state: state.INTRO
+
+        }
     },
+    async mounted() {
+        this.PIXI = this.$PIXI();
 
-    methods: {
-        async mainGame() {
-            this.PIXI = this.$PIXI();
-
-            this.app = new this.PIXI.Application({
+        this.app = new this.PIXI.Application({
                 transparent: true,
                 width: window.innerWidth,
                 height: window.innerHeight
             });
+            
+        document.querySelector('#container').appendChild(this.app.view);
 
-            document.querySelector('#container').appendChild(this.app.view);
+        await this.init()
+
+        window.addEventListener('resize', this.onResize)
+    },
+
+    methods: {
+        async init() {
 
             await this.loadAssets({
                 dino: '/dino/spritesheet.json',
                 foreground: '/foreground/spritesheet.json'
-            })
+            }).then(() => this.draw())
 
-            const character = this.character()
-            const foregrounds = this.foregrounds('blue')
+        },
+        draw() {
+            this.player = this.Player()
 
-            const initialForeGrounds = [
-                foregrounds[0],
-                foregrounds[8],
-                foregrounds[0],
-                foregrounds[0],
-                foregrounds[8]
+            this.initialGround = [
+                this.GroundByColor('blue',8, 50, 0),
+                this.GroundByColor('blue',0, 50, 1),
+                this.GroundByColor('blue',0, 50, 2),
+                this.GroundByColor('blue',8, 50, 3),
+                // this.GroundByColor('blue',0, 50, 2),
+                // this.GroundByColor('blue',0, 50, 3),
+                // this.GroundByColor('blue',8, 50, 4)
             ];
 
-            this.initialPlatform(initialForeGrounds)
+            console.log(this.initialGround)
+            this.initialGround.map((obj) => this.app.stage.addChild(obj))
+            this.app.stage.addChild(this.player)
 
-            this.app.stage.addChild(character)
-            initialForeGrounds.map((obj) => {
-                this.app.stage.addChild(obj)
-                })
+            this.playerBounds = new this.PIXI.Graphics();
+            this.playerBounds.lineStyle(2, 0xFF0000);
+            this.playerBounds.drawRect(0, 0, 100, 100);
 
-            // this.foregroundGen([{
-            //         sprite: sprite,
-            //         y: 0
-            //     }, {
-            //         sprite: sprite,
-            //         y: 0
-            // }])
+            this.app.stage.addChild(this.playerBounds)
+            
+            this.onResize()
 
-            window.onresize = () => {
-                this.app.renderer.resize(window.innerWidth, window.innerHeight);
+            this.app.ticker.add((delta) => this.onUpdate())
+        },
+        onUpdate() {
+            this.player.onUpdate()
+            
+            this.playerBounds.x = this.player.x - this.player.width/2
+            this.playerBounds.y = this.player.y - this.player.height/2
+            this.playerBounds.width = this.player.width
+            this.playerBounds.height = this.player.height
+            // this.playerBounds.zIndex = 3
+            // this.player.zIndex = 4
 
-                const width = this.app.screen.width
-                const height = this.app.screen.height
+            this.initialGround.map((ground) => {
+                if(this.rectsIntersectX(this.player, ground)){
+                    this.speedX = 0
+                } else if(this.rectsIntersectY(this.player, ground, 6)) {
+                    this.speedY = 0
+                } else {
+                    this.speedX = 4
+                    this.speedY = 4
+                }
+            })
+        },
+        onResize() {
+            this.app.renderer.resize(window.innerWidth, window.innerHeight);
 
-                character.x = width / 6
-                character.y = height - height / 6
-            }
+            const width = this.app.screen.width
+            const height = this.app.screen.height
+
+            this.player.onResize(width, height)
+            this.initialGround.map((ground) => ground.onResize(width, height))
+
         },
         loadAssets (textures) {
             return new Promise(resolve => {
@@ -70,67 +115,67 @@ export default {
                     this.PIXI.Loader.shared.load(resolve);
                 });
         },
-        character() {
+        Player() {
 
             const width = this.app.screen.width
             const height = this.app.screen.height
 
             const resource = this.PIXI.Loader.shared.resources['dino'];
-            const sprite = new this.PIXI.AnimatedSprite(resource.spritesheet.animations.walk);
+            const sprite = new this.PIXI.AnimatedSprite(resource.spritesheet.animations.hurt);
 
-            sprite.x = width / 6
-            sprite.y = height - height / 6
+            sprite.x = 96
+            sprite.y = 0
             sprite.height = 96
             sprite.width = 96
             sprite.anchor.set(0.5)
             sprite.animationSpeed = 0.1
             sprite.play()
 
+            sprite.onResize = (width, height) => {
+                sprite.x = 96
+                sprite.y = 0
+            }
+
+            sprite.onUpdate = () => {
+                sprite.y += this.speedY
+            }
+
             return sprite
         },
-        foregrounds(color) {
+        GroundByColor(color, variant, y, offset) {
+            if(!color) return
+            if(isNaN(variant)) return
 
-            const resource = this.PIXI.Loader.shared.resources['foreground'];
-            const sprites = Object.keys(resource.textures)
-                .reduce((acc, key) => {
-                    if(color){
-                        if(key.includes(color)){
-                            acc.push(new this.PIXI.Sprite(resource.textures[key]))
-                        }
-                    } else {
-                        acc.push(new this.PIXI.Sprite(resource.textures[key]))
-                    }
-                    return acc
-                }, [])
-
-            return sprites
-
-        },
-        initialPlatform(foregrounds) {
-            foregrounds.map((sprite, index) => {
-
-                const width = this.app.screen.width
-                const height = this.app.screen.height
-
-                sprite.height = 48
-                sprite.width = 48
-
-                const offset = sprite.width * index
-                sprite.x = (width / 6) + offset
-                sprite.y = height - height / 8
-                sprite.anchor.set(0.5)
-            })
-        },
-        foregroundGen(foregrounds) {
             const width = this.app.screen.width
             const height = this.app.screen.height
 
-            this.app.ticker.add(() => {
-                foregrounds.map((foreground) => {
-                    foreground.sprite.x += 48
-                })
-            })
+            const resource = this.PIXI.Loader.shared.resources['foreground'];
+            const sprite = new this.PIXI.Sprite(resource.spritesheet.textures[`${color}-${variant}.png`])
 
+            sprite.width = 48
+            sprite.height = 48
+            sprite.x = 0 + offset * sprite.width
+            sprite.y = height - y
+
+            sprite.onResize = (width, height) => {
+                sprite.y = height - y
+            }
+
+            return sprite
+        },
+        rectsIntersectX(a, b) {
+            let aBox = a.getBounds()
+            let bBox = b.getBounds()
+
+            return aBox.x + aBox.width > bBox.x &&
+                   aBox.x < bBox.x + bBox.width
+        },
+        rectsIntersectY(a, b, offset) {
+            let aBox = a.getBounds()
+            let bBox = b.getBounds()
+
+            return aBox.y + aBox.height - offset > bBox.y &&
+                   aBox.y < bBox.y + bBox.height - offset
         }
 
     }
