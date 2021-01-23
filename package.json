@@ -14,7 +14,7 @@
     "@nuxtjs/pwa": "^3.0.2",
     "bowser": "^2.11.0",
     "core-js": "^3.6.5",
-    "gsap": "./gsap-bonus.tgz",
+    "gsap": "npm:@gsap/shockingly",
     "nuxt": "^2.14.6",
     "pixi.js-legacy": "^5.3.7"
   },

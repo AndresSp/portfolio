@@ -4808,9 +4808,10 @@ gray-matter@^4.0.2:
     section-matter "^1.0.0"
     strip-bom-string "^1.0.0"
 
-gsap@./gsap-bonus.tgz:
+"gsap@npm:@gsap/shockingly":
   version "3.6.0"
-  resolved "./gsap-bonus.tgz#c52bb0925db5dd09b47b83991edac6eedab8a2f5"
+  resolved "https://npm.greensock.com/@gsap%2fshockingly/-/shockingly-3.6.0.tgz#df5924b1668867200780eb018897bbeca7ab8250"
+  integrity sha512-Rz2/SpkpiVTeLb8ONzUeTMUmSTZXhEFkl8BHW6Rx29L+k6E/GE/Pj5hMuWo4H3C1AKa3lxLC5wNdusIM1CO95w==
 
 gzip-size@^5.0.0:
   version "5.1.1"

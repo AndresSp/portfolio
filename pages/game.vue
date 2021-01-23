@@ -32,7 +32,7 @@ export default {
             playerBounds: undefined,
             initialGround: [],
             ground: undefined,
-            groundGravity: 5,
+            groundGravity: 10,
             jumpHeight: 96 * 3
 
         }
@@ -91,6 +91,7 @@ export default {
             //#region collision
 
             const nearbyGround = this.initialGround.reduce((smallest, current) => {
+
                 if(!smallest){
                     return current
                 }
@@ -145,7 +146,7 @@ export default {
                this.playerState == playerState.HURT && this.gameState == gameState.INTRO){
                 if(this.collision(this.player, nearbyGround, 7)){
                     this.vY = 0
-                    if(this.playerState != playerState.WALK && this.playerState == playerState.FALL){
+                    if(this.playerState != playerState.WALK && this.playerState == playerState.FALL){ //FALL to WALK
                         this.playerState = playerState.WALK
                     }
                 } else {
@@ -157,10 +158,13 @@ export default {
 
             //#region game state
 
-            if(this.initialGround.every(ground => ground.y > this.player.y && ground.y > 50) 
+            if(this.initialGround.every(ground => ground.y > this.player.y && ground.y > 50) //grounds below player
+            && this.distance(nearbyGround, this.player) < 90 //player on the ground
             && this.gameState == gameState.INTRO){
                 this.gameState = gameState.PLAY
                 this.playerState = playerState.WALK
+                this.vX = -3
+                this.groundGravity= 30
             }
 
             //#endregion game state
@@ -204,7 +208,7 @@ export default {
             sprite.height = 96
             sprite.width = 96
             sprite.x = 96
-            sprite.y = -2000
+            sprite.y = -1000
             sprite.anchor.set(0.5)
             sprite.animationSpeed = 0.1
             sprite.play()
@@ -221,8 +225,11 @@ export default {
             }
 
             sprite.onUpdate = (delta) => {
-                sprite.x += this.vX
                 sprite.y += this.vY
+            }
+
+            sprite.onJump = () => {
+                this.vY = -5
             }
 
             return sprite
@@ -240,7 +247,7 @@ export default {
             sprite.width = 48
             sprite.height = 48
             sprite.x = 0 + index * sprite.width
-            sprite.y = 0 - (sprite.height * 2 * index)
+            sprite.y = 0 - (sprite.height * 3/4 * index)
 
             sprite.onResize = (width, height) => {
                 if(this.gameState != gameState.INTRO){
@@ -249,6 +256,13 @@ export default {
             }
 
             sprite.onUpdate = (delta) => {
+                sprite.x += this.vX
+
+                if(sprite.x  < - sprite.width){
+                    sprite.x = 0 + width - 35
+                    sprite.y = 0 - (sprite.height * 3/4)
+                }
+
                 if(sprite.y < height - yOffset){
                     sprite.y += this.groundGravity
                 } else {
