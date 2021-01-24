@@ -27,10 +27,12 @@ export default {
             player: undefined,
             prevPlayerState: playerState.HURT,
             playerState: playerState.HURT,
+            playerGravity: 0.5,
             vX: 0,
             vY: 0,
             playerBounds: undefined,
-            initialGround: [],
+            baseGround: [],
+            lastGround: 0,
             ground: undefined,
             groundGravity: 10,
             jumpHeight: 96 * 3
@@ -65,9 +67,9 @@ export default {
         draw() {
             this.player = this.Player()
 
-            this.initialGround = this.genInitialGrounds()
+            this.baseGround = this.genbaseGrounds()
 
-            this.initialGround.map((obj) => this.app.stage.addChild(obj))
+            this.baseGround.map((obj) => this.app.stage.addChild(obj))
             this.app.stage.addChild(this.player)
 
             this.playerBounds = new this.PIXI.Graphics();
@@ -90,7 +92,7 @@ export default {
 
             //#region collision
 
-            const nearbyGround = this.initialGround.reduce((smallest, current) => {
+            const nearbyGround = this.baseGround.reduce((smallest, current) => {
 
                 if(!smallest){
                     return current
@@ -135,8 +137,7 @@ export default {
             //#region player state
 
             if(this.playerState == playerState.JUMP){ //JUMP
-                this.vY = -10;
-                if(this.player.y <= this.app.screen.height - this.jumpHeight){
+                if(this.vY > 0){
                     this.playerState = playerState.FALL
                 }
             }
@@ -149,8 +150,6 @@ export default {
                     if(this.playerState != playerState.WALK && this.playerState == playerState.FALL){ //FALL to WALK
                         this.playerState = playerState.WALK
                     }
-                } else {
-                    this.vY = 10
                 }
             }
 
@@ -158,7 +157,7 @@ export default {
 
             //#region game state
 
-            if(this.initialGround.every(ground => ground.y > this.player.y && ground.y > 50) //grounds below player
+            if(this.baseGround.every(ground => ground.y > this.player.y && ground.y > 50) //grounds below player
             && this.distance(nearbyGround, this.player) < 90 //player on the ground
             && this.gameState == gameState.INTRO){
                 this.gameState = gameState.PLAY
@@ -167,13 +166,19 @@ export default {
                 this.groundGravity= 30
             }
 
+            if(this.playerState == playerState.WALK){
+                this.vX = -3
+            } else if (this.playerState == playerState.JUMP) {
+                this.vX = -7
+            }
+
             //#endregion game state
 
             //#region loops
 
             this.player.onUpdate(delta)
 
-            this.initialGround.map((ground, i) => { //falling grounds
+            this.baseGround.map((ground, i) => { //falling grounds
                 ground.onUpdate(delta)
             })
 
@@ -186,7 +191,7 @@ export default {
             const height = this.app.screen.height
 
             this.player.onResize(width, height)
-            this.initialGround.map((ground) => ground.onResize(width, height))
+            this.baseGround.map((ground) => ground.onResize(width, height))
 
         },
         loadAssets (textures) {
@@ -218,22 +223,25 @@ export default {
                 // sprite.y = 0
             }
 
-            window.onkeyup = (event) => {
+            window.onkeydown = (event) => {
                 if(event.keyCode == 32 && this.playerState == playerState.WALK) { //Space
                     this.playerState = playerState.JUMP
+                    this.player.onJump()
                 }
             }
 
             sprite.onUpdate = (delta) => {
                 sprite.y += this.vY
+                this.vY += this.playerGravity
             }
 
             sprite.onJump = () => {
-                this.vY = -5
+                this.vY = -15
             }
 
             return sprite
         },
+
         GroundByColor(color, variant, yOffset, index) {
             if(!color) return
             if(isNaN(variant)) return
@@ -258,9 +266,24 @@ export default {
             sprite.onUpdate = (delta) => {
                 sprite.x += this.vX
 
+                const lastGround = this.baseGround.reduce((last, current) => {
+
+                if(!last){
+                    return current
+                }
+                const currentX = current.x
+                const lastX = last.x
+
+                    if(currentX > lastX){
+                        return current
+                    } else {
+                        return last
+                    }
+                }, undefined)
+
                 if(sprite.x  < - sprite.width){
-                    sprite.x = 0 + width - 35
-                    sprite.y = 0 - (sprite.height * 3/4)
+                    sprite.x =  lastGround.x + sprite.width
+                    sprite.y = height - yOffset
                 }
 
                 if(sprite.y < height - yOffset){
@@ -273,13 +296,15 @@ export default {
 
             return sprite
         },
-        genInitialGrounds() {
+        genbaseGrounds() {
             const width = this.app.screen.width
-            const maxGrounds = width / 48 // 48 == ground width
+            const maxGrounds = (width + 48) / 48 // 48 == ground width
             let arr = []
 
             for (let index = 0; index < maxGrounds; index++) {
-                arr.push(this.GroundByColor('blue', index % 4 ? 0 : 8, 50, index))
+                let variant = index % 4 ? 0 : 8
+                variant = (index == (maxGrounds - 1) || index == 0) ? 9 : variant
+                arr.push(this.GroundByColor('blue', variant, 50, index))
             }
 
             return arr
